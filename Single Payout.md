@@ -1,0 +1,82 @@
+# Single Payout
+
+Single Transaction Payment
+
+## Method And EndPoint
+
+```http
+  POST  https://api.kratostech.in/payout-service
+```
+
+### Headers
+
+| Key             | Value            |
+| :-------------- | :--------------- |
+| `Content-type`  | application/JSON |
+| `Authorization` | `jwtToken`       |
+
+### Body Parameters
+
+| Key                   | Value    |
+| :-------------------- | :------- |
+| `token`               | `string` |
+| `clientTransactionId` | `string` |
+| `amount`              | `number` |
+| `beneficiaryDetails`  | `object` |
+| `accountType`         | `string` |
+| `Ifsc`                | `string` |
+| `branch`              | `string` |
+| `accountNumber`       | `number` |
+| `name`                | `string` |
+| `address`             | `string` |
+| `bankName`            | `string` |
+| `email`               | `string` |
+| `mobile`              | `string` |
+| `paymentMode`         | `string` |
+
+### Sample Request Body
+
+```json
+{
+    "token": "your-generated-auth-token",
+    "clientTransactionId": "cli001",
+    "amount": 100,
+    "beneficiaryDetails": {
+        "accountType": "savings",
+        "ifsc": "ABCD0000001",
+        "branch": "Noida",
+        "accountNumber": 98712345674567,
+        "name": "John Doe",
+        "address": "Street x Noida",
+        "bankName": "Example Bank",
+        "email": "john@example.com",
+        "mobile": "99999999"
+    },
+    "paymentMode": "IMPS"
+}
+```
+
+### Sample cURL
+
+```curl
+curl --location 'https://api.kratostech.in/payout-service' \
+--header 'Authorization: bearer your-jwt-token' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "token" : "your-generated-auth-token",
+  "clientTransactionId" : "cli001",
+  "amount" : 100,
+  "beneficiaryDetails" : {
+    "accountType" : "savings",
+    "ifsc" : "ABCD0000001",
+    "branch" : "Noida",
+    "accountNumber": 98712345674567,
+    "name" : "John Doe",
+    "address" : "Street x Noida",
+    "bankName" : "Example Bank",
+    "email" : "john@example.com",
+    "mobile" : "99999999"
+   },
+  "paymentMode" : "IMPS"
+}'
+```
