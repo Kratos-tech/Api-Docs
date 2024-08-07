@@ -1,0 +1,253 @@
+# Auth Token Generation
+
+This token generation script creates a secure, time-sensitive token using HMAC-SHA256. The token ensures secure communication between parties by verifying that the message has not been altered. The token is valid for a specified window of time, making it suitable for scenarios where temporary, secure access is required.
+
+# Constants
+
+`TOKEN_VALIDITY`: This constant defines the validity window of the token in seconds. In this script, it is set to 300 seconds (5 minutes).
+
+# Function: `generateToken`
+
+Generates a time-sensitive HMAC-SHA256 token based on the provided signing key, reference ID, and merchant code.
+
+### Parameters
+
+-   `signingKey`: (String) The secret key used to sign the message. This should be kept secure and not shared publicly.
+-   `referenceID`: (String) A unique identifier for the transaction or request.
+-   `merchantCode`: (String) A unique code representing the merchant or client.
+
+### Returns
+
+-   `token`: (String) The generated token in the format `${currentTime}:${token}`, where `currentTime` is the current timestamp and `token` is the HMAC-SHA256 digest.
+
+# Code
+
+```javascript
+const crypto = require("crypto");
+
+// Token validity window (in seconds)
+const TOKEN_VALIDITY = 300; // 5 minutes
+
+// Token Generation Function
+function generateToken(signingKey, referenceID, merchantCode) {
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // Concatenate the elements
+    const message = `${referenceID}|${merchantCode}|${currentTime}`;
+
+    // HMAC Generation
+    const hmac = crypto.createHmac("sha256", signingKey);
+    hmac.update(message);
+    const token = hmac.digest("hex");
+
+    // Token Construction
+    return `${currentTime}:${token}`;
+}
+```
+
+## How It Works
+
+-   Current Time: The function calculates the current time in seconds since the Unix epoch.
+-   Message Creation: It concatenates the `referenceID`, `merchantCode`, and `currentTime` into a single string separated by pipe (`|`) character.
+-   HMAC Calculation: Using the `crypto` module, the function creates an HMAC object with the `sha256` algorithm and the provided `signingKey`. It then updates the HMAC object with the concatenated message and generates the digest in hexadecimal format.
+-   Token Formation: The function returns the token as a string in the format `${currentTime}:${token}`, where `currentTime` is the Unix timestamp and `token` is the HMAC-SHA256 digest.
+
+# Usage
+
+### NodeJs
+
+```javascript
+const crypto = require("crypto");
+
+const signingKey = "clientSecret";
+const merchantCode = "merchantCode";
+const referenceID = "ref";
+
+// Token validity window (in seconds)
+const TOKEN_VALIDITY = 300; // 5 minutes
+
+function generateToken(signingKey, referenceID, merchantCode) {
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // Concatenate the elements
+    const message = `${referenceID}|${merchantCode}|${currentTime}`;
+
+    // HMAC Generation
+    const hmac = crypto.createHmac("sha256", signingKey);
+    hmac.update(message);
+    const token = hmac.digest("hex");
+
+    // Token Construction
+    return `${currentTime}:${token}`;
+}
+
+//function usage
+const token = generateToken(signingKey, referenceID, merchantCode);
+```
+
+### Javascript (Browser Execution)
+
+```javascript
+// Token validity window (in seconds)
+const TOKEN_VALIDITY = 300; // 5 minutes
+
+// Function to generate HMAC token using Web Crypto API
+async function generateToken(signingKey, referenceID, merchantCode) {
+    // Get the current time in seconds since the Unix epoch
+    const currentTime = Math.floor(Date.now() / 1000);
+
+    // Concatenate the elements into a single message string
+    const message = `${referenceID}|${merchantCode}|${currentTime}`;
+
+    // Create a TextEncoder to encode the signing key and message
+    const encoder = new TextEncoder();
+    const keyData = encoder.encode(signingKey); // Encode the signing key
+    const messageData = encoder.encode(message); // Encode the message
+
+    // Import the signing key for use with the HMAC algorithm
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw",
+        keyData,
+        { name: "HMAC", hash: { name: "SHA-256" } },
+        false,
+        ["sign"]
+    );
+
+    // Generate the HMAC signature using the imported key and message
+    const signature = await crypto.subtle.sign("HMAC", cryptoKey, messageData);
+
+    // Convert the ArrayBuffer signature to a hexadecimal string
+    const token = Array.from(new Uint8Array(signature))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+
+    // Return the token in the format: currentTime:token
+    return `${currentTime}:${token}`;
+}
+
+// Function usage example
+(async () => {
+    // Example values for the signing key, merchant code, and reference ID
+    const signingKey = "clientSecret";
+    const merchantCode = "merchantCode";
+    const referenceID = "ref";
+
+    // Generate the token
+    const token = await generateToken(signingKey, referenceID, merchantCode);
+
+    // Output the generated token
+    console.log(token);
+})();
+```
+
+### PHP
+
+```php
+<?php
+// Token validity window (in seconds)
+define('TOKEN_VALIDITY', 300); // 5 minutes
+
+/**
+ * Generates a HMAC token using SHA-256.
+ *
+ * @param string $signingKey The secret key used for signing.
+ * @param string $referenceID The reference ID for the transaction.
+ * @param string $merchantCode The merchant code.
+ * @return string The generated token in the format: currentTime:token.
+ */
+
+function generateToken($signingKey, $referenceID, $merchantCode) {
+    // Get the current time in seconds since the Unix epoch
+    $currentTime = time();
+
+    // Concatenate the elements into a single message string
+    $message = "{$referenceID}|{$merchantCode}|{$currentTime}";
+
+    // Generate the HMAC hash using SHA-256
+    $token = hash_hmac('sha256', $message, $signingKey);
+
+    // Return the token in the format: currentTime:token
+    return "{$currentTime}:{$token}";
+}
+
+// Function usage
+$signingKey = 'clientSecret';
+$merchantCode = 'merchantCode';
+$referenceID = 'ref';
+
+// Generate the token
+$token = generateToken($signingKey, $referenceID, $merchantCode);
+?>
+```
+
+### Java
+
+```java
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+
+public class TokenGenerator {
+
+    // Token validity window (in seconds)
+    private static final int TOKEN_VALIDITY = 300; // 5 minutes
+
+    /**
+     * Generates a HMAC token using SHA-256.
+     *
+     * @param signingKey The secret key used for signing.
+     * @param referenceID The reference ID for the transaction.
+     * @param merchantCode The merchant code.
+     * @return The generated token in the format: currentTime:token.
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     */
+    public static String generateToken(String signingKey, String referenceID, String merchantCode) throws NoSuchAlgorithmException, InvalidKeyException {
+        // Get the current time in seconds since the Unix epoch
+        long currentTime = Instant.now().getEpochSecond();
+
+        // Concatenate the elements into a single message string
+        String message = referenceID + "|" + merchantCode + "|" + currentTime;
+
+        // Generate the HMAC hash using SHA-256
+        Mac hmacSha256 = Mac.getInstance("HmacSHA256");
+        SecretKeySpec secretKeySpec = new SecretKeySpec(signingKey.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        hmacSha256.init(secretKeySpec);
+        byte[] hashBytes = hmacSha256.doFinal(message.getBytes(StandardCharsets.UTF_8));
+
+        // Convert the byte array to a hex string
+        StringBuilder hexString = new StringBuilder();
+        for (byte b : hashBytes) {
+            String hex = Integer.toHexString(0xff & b);
+            if (hex.length() == 1) {
+                hexString.append('0');
+            }
+            hexString.append(hex);
+        }
+        String token = hexString.toString();
+
+        // Return the token in the format: currentTime:token
+        return currentTime + ":" + token;
+    }
+
+    public static void main(String[] args) {
+        try {
+            // Example usage
+            String signingKey = "clientSecret";
+            String merchantCode = "merchantCode";
+            String referenceID = "ref";
+
+            // Generate the token
+            String token = generateToken(signingKey, referenceID, merchantCode);
+
+            // Output the generated token
+            System.out.println(token);
+        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+            e.printStackTrace();
+        }
+    }
+}
+```
