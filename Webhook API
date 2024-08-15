@@ -1,0 +1,143 @@
+# Webhook API Documentation for Merchant Notifications
+
+## Overview
+
+This document outlines the webhook API for notifying merchants about the status of their transactions on the payments platform. Webhooks allow real-time updates to be sent to the merchant's specified endpoint as events occur in the system.
+
+## Endpoint
+
+Merchants should provide a POST endpoint URL where they wish to receive webhook notifications.
+
+## Headers
+
+The following headers will be included in all webhook POST requests:
+
+
+Content-Type: application/json
+
+
+## Events
+
+The following events are supported:
+
+1. PAYIN_SUCCESS
+2. PAYIN_FAILED
+3. PAYIN_EXPIRED
+4. PAYOUT_FAILED
+5. PAYOUT_SUCCESSFUL
+
+## Payload Structure
+
+All webhook payloads will follow this general structure:
+
+json
+{
+  "event": "[EVENT_NAME]",
+  "timestamp": "[ISO8601 timestamp]",
+  "data": {
+    // Event-specific data
+  }
+}
+
+
+## Event-Specific Payloads
+
+### 1. PAYIN_SUCCESS
+
+json
+{
+  "event": "PAYIN_SUCCESS",
+  "timestamp": "2024-08-15T14:30:00Z",
+  "data": {
+    "clientTransactionId": "pay_123456789",
+    "status":"success",
+    "statusCode":1
+    "utr":"lajsdkfasmgd",
+    bankId:"fsgsedthtsjhtdkmbg",
+    transactionId:123
+  }
+}
+
+
+### 2. PAYIN_FAILED
+
+json
+{
+  "event": "PAYIN_FAILED",
+  "timestamp": "2024-08-15T14:35:00Z",
+ "data": {
+    "clientTransactionId": "pay_123456789",
+    "status":"failed",
+    "statusCode":0
+    "transactionId":123
+  }
+}
+
+
+### 3. PAYIN_EXPIRED
+
+json
+{
+  "event": "PAYIN_EXPIRED",
+  "timestamp": "2024-08-15T15:00:00Z",
+ "data": {
+    "clientTransactionId": "pay_123456789",
+    "status":"expired",
+    "statusCode":2
+  }
+}
+
+
+### 4. PAYOUT_FAILED
+
+json
+{
+  "event": "PAYOUT_FAILED",
+  "timestamp": "2024-08-15T16:15:00Z",
+  "data": {
+    "clientTransactionId": "pay_123456789",
+    "status":"failed",
+    "statusCode":0
+    "transactionId":123
+  }
+}
+
+
+### 5. PAYOUT_SUCCESSFUL
+
+json
+{
+  "event": "PAYOUT_SUCCESSFUL",
+  "timestamp": "2024-08-15T17:00:00Z",
+ "data": {
+    "clientTransactionId": "pay_123456789",
+    "status":"success",
+    "statusCode":1
+    "utr":"lajsdkfasmgd",
+    "bankId":"fsgsedthtsjhtdkmbg",
+    "transactionId":123
+  }
+}
+
+
+## Handling Webhooks
+
+1. Verify the webhook signature to ensure the payload hasn't been tampered with.
+2. Process the event based on the event field in the payload.
+3. Use the data in the data object to update your systems accordingly.
+4. Respond with a 200 OK status code to acknowledge receipt of the webhook.
+
+## Best Practices
+
+1. Implement retry logic in case your endpoint is temporarily unavailable.
+2. Process webhooks asynchronously to avoid timeout issues.
+3. Store the raw webhook payload for debugging and audit purposes.
+4. Implement idempotency checks to handle potential duplicate webhook deliveries.
+
+## Testing
+
+A sandbox environment is available for testing webhook integrations. Contact support for access and mock event generation.
+
+## Support
+
+For any issues or questions regarding webhook integration, please contact our support team at support@kratostech.in
